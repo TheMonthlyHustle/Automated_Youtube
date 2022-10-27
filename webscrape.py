@@ -2,23 +2,17 @@ from distutils.command.clean import clean
 import requests
 from bs4 import BeautifulSoup
 
-# check status code for reponse received
-
+# Collects data from base webpage
 def collect_website_data(url):
     r = requests.get(url)
     soup = BeautifulSoup(r.content, 'html.parser')
     return soup
 
-if __name__ == "__main__":
-
-    #Get Content
+#Turns BeautifulSoup object as parameter, then returns list of urls
+def get_urls(bs_object, substring):
     links = []
-    base_url = "https://www.reviewed.com/best-right-now"
-    substring = 'https://www.reviewed.com/'
-
-    soupy = collect_website_data(base_url)
-
-    for link in soupy.find_all('a'):
+    a_elements = bs_object.find_all('a')
+    for link in a_elements:
         clean_link= link.get('href')
         try:    
             if substring in clean_link:
@@ -27,12 +21,19 @@ if __name__ == "__main__":
             pass
     
     links = list(set(links))
+    return links
 
-    #Search List of URL and pull all p tag text
-    
-    for i in range(len(links)):
-        page_data = collect_website_data(links[i])
-        fname = f'c:\\temp\\output{i}.txt'
+#Main Script Logic
+if __name__ == "__main__":
+    base_url = "https://www.reviewed.com/best-right-now"
+    substring = 'https://www.reviewed.com/'
+    soupy = collect_website_data(base_url)
+    product_links = get_urls(soupy, substring)
+
+    #Loop through each URL and pull all p tag text for that page
+    for i in range(len(product_links)):
+        page_data = collect_website_data(product_links[i])
+        fname = f'/Users/josh/Python/Data/output{i}.txt'
         with open(fname, 'w', encoding="utf-8") as f:
             for data in page_data.find_all('p'):
                 f.write(data.get_text())
