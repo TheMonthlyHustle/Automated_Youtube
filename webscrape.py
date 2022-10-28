@@ -59,19 +59,25 @@ def get_page_data(url_list):
             title = review_page.h1.text
             title_md = "#" + " " + title + "\n\n"
             markdown_string += title_md
-            for data in url_list:
-                data_page = collect_website_data(data)
-                product_title = data_page.h2.text
-                review_md = "##" + " " + product_title + "\n"
-                markdown_string += review_md
-                try:
-                    review_data = data_page.find_all('p').get_text()
-                    review_md = review_data + "\n\n"
-                    markdown_string += review_md
-                except AttributeError:
-                    markdown_string += '\n\n'
+
+            product_title = review_page.h3.text
+            review_md = "##" + " " + product_title + "\n"
+            markdown_string += review_md
+
+            for data in review_page.find_all('p'):
+                    data_md = data.get_text() + "\n\n"
+                    markdown_string += data_md
+                    
+            """
+            for i in range(len(url_list)):
+                page_data = collect_website_data(url_list[i])
+                for data in page_data.find_all('p'):
+                    data_md = data.get_text() + "\n\n"
+                    markdown_string += data_md
+            """
+            bar.update(counter)
         markdown_string += '\\newpage'
-        bar.update(counter)
+        
     return markdown_string
 
 def convert_to_word(markdown_string):
