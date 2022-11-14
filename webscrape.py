@@ -1,3 +1,4 @@
+from inspect import Attribute
 from nturl2path import url2pathname
 from unicodedata import category
 import requests
@@ -60,23 +61,36 @@ def get_page_data(url_list):
             title_md = "#" + " " + title + "\n\n"
             markdown_string += title_md
 
-            product_title = review_page.h3.text
-            review_md = "##" + " " + product_title + "\n"
-            markdown_string += review_md
+            #product_title = review_page.find_all('div', {'class': 'u3'})
+           #for data in product_title:
+                #review_md = "##" + " " + data.get_text() + "\n"
+                #markdown_string += review_md
+            
+            reviews = review_page.find_all('div', {'class': 'c-product-widget__text-container--big'})
+            for review in reviews:
+                try:
+                    title = review.find('div', {'class': 'u3 c-product-widget__name'})
+                    title_md = "##" + title.get_text() + "\n\n"
+                    markdown_string += title_md
+                except AttributeError as e:
+                    markdown_string += '\n\n'
 
-            for data in review_page.find_all('p'):
+                try:
+                    ul = review.find("ul").find('li')
+                    ul_md = "*" + " " + ul.get_text() + "\n\n"
+                    markdown_string += ul_md
+                except AttributeError as e:
+                    markdown_string += '\n\n'
+
+                try:
+                    data = review.find('div', {'class': 'c-product-widget__content'})
                     data_md = data.get_text() + "\n\n"
                     markdown_string += data_md
-                    
-            """
-            for i in range(len(url_list)):
-                page_data = collect_website_data(url_list[i])
-                for data in page_data.find_all('p'):
-                    data_md = data.get_text() + "\n\n"
-                    markdown_string += data_md
-            """
+                except AttributeError as e:
+                    markdown_string += '\n\n'
+
             bar.update(counter)
-        markdown_string += '\\newpage'
+            markdown_string += '\\newpage'
         
     return markdown_string
 
@@ -109,7 +123,7 @@ if __name__ == "__main__":
 
     #to-do pull header tags - done
     #to-do search amazon api and generate affiliate links for products
-    #to-do use markdown to format word doc just like webpage for blog posts
+    #to-do use markdown to format word doc just like webpage for blog posts - Close Enough
     #to-do pull images related to product"""
 
 
