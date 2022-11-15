@@ -4,6 +4,7 @@ from unicodedata import category
 import requests
 import pypandoc
 import progressbar
+import subprocess, sys
 from bs4 import BeautifulSoup
 
 # Collects data from base webpage
@@ -58,7 +59,12 @@ def get_page_data(url_list):
         for counter, url in enumerate(url_list):
             review_page = collect_website_data(url)
             title = review_page.h1.text
-            title_md = "#" + " " + title + "\n\n"
+            #title_md = "#" + " " + title + "\n\n"
+            title_md = title
+            title_md = title_md.replace(" ", "")
+            with open(f"D:\TMH\Code\Automated_Youtube\Output\{title_md}.txt", 'w', encoding="utf-8") as f: 
+                f.writelines(title_md)
+                f.write('\n')
             markdown_string += title_md
 
             #product_title = review_page.find_all('div', {'class': 'u3'})
@@ -68,31 +74,48 @@ def get_page_data(url_list):
             
             reviews = review_page.find_all('div', {'class': 'c-product-widget__text-container--big'})
             for review in reviews:
-                try:
-                    title = review.find('div', {'class': 'u3 c-product-widget__name'})
-                    title_md = "##" + title.get_text() + "\n\n"
-                    markdown_string += title_md
-                except AttributeError as e:
-                    markdown_string += '\n\n'
+                    try:
+                        product = review.find('div', {'class': 'u3 c-product-widget__name'})
+                        #title_md = "##" + title.get_text() + "\n\n"
+                        product_md = product.get_text().strip()
+                        with open(f"D:\TMH\Code\Automated_Youtube\Output\{title_md}.txt", 'a', encoding="utf-8") as f:
+                            f.writelines(product_md)
+                            f.write('\n')
+                    except AttributeError as e:
+                        with open(f"D:\TMH\Code\Automated_Youtube\Output\{title_md}.txt", 'a', encoding="utf-8") as f:
+                            f.writelines('\n\n')
+                            #markdown_string += '\n\n'
 
-                try:
-                    ul = review.find("ul").find('li')
-                    ul_md = "*" + " " + ul.get_text() + "\n\n"
-                    markdown_string += ul_md
-                except AttributeError as e:
-                    markdown_string += '\n\n'
+                    try:
+                        ul = review.find("ul").find('li')
+                        #ul_md = "*" + " " + ul.get_text() + "\n\n"
+                        ul_md = ul.get_text()
+                        with open(f"D:\TMH\Code\Automated_Youtube\Output\{title_md}.txt", 'a', encoding="utf-8") as f:
+                            #markdown_string += ul_md
+                            f.writelines((ul_md))
+                            f.write('\n')
+                    except AttributeError as e:
+                        with open(f"D:\TMH\Code\Automated_Youtube\Output\{title_md}.txt", 'a', encoding="utf-8") as f:
+                            f.writelines('\n\n')
+                            #markdown_string += '\n\n'
 
-                try:
-                    data = review.find('div', {'class': 'c-product-widget__content'})
-                    data_md = data.get_text() + "\n\n"
-                    markdown_string += data_md
-                except AttributeError as e:
-                    markdown_string += '\n\n'
+                    try:
+                        data = review.find('div', {'class': 'c-product-widget__content'})
+                        #data_md = data.get_text() + "\n\n"
+                        data_md = data.get_text()
+                        with open(f"D:\TMH\Code\Automated_Youtube\Output\{title_md}.txt", 'a', encoding="utf-8") as f:
+                            #markdown_string += data_md
+                            f.writelines((data_md))
+                            f.write('\n')
+                    except AttributeError as e:
+                        with open(f"D:\TMH\Code\Automated_Youtube\Output\{title_md}.txt", 'a', encoding="utf-8") as f:
+                            f.writelines('\n\n')
+                            #markdown_string += '\n\n'
 
             bar.update(counter)
-            markdown_string += '\\newpage'
+            #markdown_string += '\\newpage'
         
-    return markdown_string
+    #return markdown_string
 
 def convert_to_word(markdown_string):
     #Converts markdown to a word document
@@ -109,9 +132,9 @@ if __name__ == "__main__":
     #titles = get_titles(product_links)
     #markdown = markdown_formatting(titles)
     review_data = get_page_data(product_links)
-    convert_to_word(review_data)
-
-
+    #convert_to_word(review_data)
+    powershell = subprocess.Popen(["powershell.exe", "D:\\TMH\\Code\\Automated_Youtube\\Azure_TTS.ps1"], stdout=sys.stdout)
+    powershell.communicate()
     #Loop through each URL and pull all p tag text for that page
     """for i in range(len(product_links)):
         page_data = collect_website_data(product_links[i])
